@@ -12,6 +12,7 @@ app.disable('x-powered-by');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
 const morgan = require('morgan');
+const verifyToken = require('./middleware/verifyToken')
 
 switch (app.get('env')) {
   case 'development':
@@ -40,6 +41,8 @@ app.use((req, res, next) => {
 
   res.sendStatus(406);
 });
+
+// app.use(verifyToken); TODO: Do I need this?
 
 const books = require('./routes/books');
 const favorites = require('./routes/favorites');
