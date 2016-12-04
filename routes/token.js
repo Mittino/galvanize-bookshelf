@@ -43,11 +43,19 @@ router.post('/token', (req, res, next) => {
       email: req.body.email,
     })
     .then(function(results) {
-      if (results[0]){
-        var matches = bcrypt.compareSync(req.body.password, results[0].hashed_password);
+      var user = results[0];
+      if (user){
+        var matches = bcrypt.compareSync(req.body.password, user.hashed_password);
         if (matches === true){
-          //var token = jwt.sign({ //});
-          res.send("token goes here").status(200);
+          var response = {
+            id: user.id,
+            email: user.email,
+            firstName: user.first_name,
+            lastName: user.last_name
+          };
+          var token = jwt.sign(response, secret);
+          res.cookie("/token", token, {httpOnly: true});
+          res.send(response).status(200);
         } else {
           throw new Error('Password does not match');
         }
