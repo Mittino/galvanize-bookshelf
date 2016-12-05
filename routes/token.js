@@ -5,9 +5,11 @@ const express = require('express');
 // eslint-disable-next-line new-cap
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const boom = require('boom');
 require('dotenv').config();
-var knex = require('../knex');
-var bcrypt = require('bcrypt');
+const knex = require('../knex');
+const bcrypt = require('bcrypt');
 
 const secret = process.env.JWT_SECRET;
 
@@ -26,15 +28,15 @@ const secret = process.env.JWT_SECRET;
 
 router.get('/token', (req, res, next) => {
   if (!req.cookies.token){
-    res.status(200).send('false');
+    res.status(200).json(false);
   } else {
-
+    try {
+      jwt.verify(req.cookies.token, secret);
+      res.json(true).status(200);
+    } catch(err) {
+      res.json(false).status(400);
+    }
   }
-  // check cookie for token
-    // if it exists, verify
-      // resp with 200 and true if it verifies
-      // resp with 200 and false if it does NOT verify
-
 });
 
 router.post('/token', (req, res, next) => {
@@ -54,35 +56,18 @@ router.post('/token', (req, res, next) => {
             lastName: user.last_name
           };
           var token = jwt.sign(response, secret);
-          res.cookie("/token", token, {httpOnly: true});
-          res.send(response).status(200);
+          res.cookie("token", token, {httpOnly: true});
+          res.json(response).status(200);
         } else {
-          throw new Error('Password does not match');
+          throw new boom.create(400, 'Bad email or password');
         }
       } else {
-        throw new Error('No results in the DB');
+        throw new boom.create(400, 'Bad email or password');
       }
     })
     .catch(function(err) {
-      res.status(400).send("Bad email or password");
-      // errs for either DB trip
+      next(err);
     });
-
-
-
-// check the req body for email and password
-// verify that email and password (remember to check hashed pass) match a user in the DB
-  // if it does match a user,
-    // create a JWT
-    // set the JWT as a cookie
-    // resp with 200 and {
-      //   id: 1,
-      //   firstName: 'Joanne',
-      //   lastName: 'Rowling',
-      //   email: 'jkrowling@gmail.com'
-      // }
-  // if it does NOT match a user,
-    // resp with 400, 'Bad email or password'
 });
 
 router.delete('/token', (req, res, next) => {
