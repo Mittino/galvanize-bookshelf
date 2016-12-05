@@ -14,18 +14,6 @@ const bcrypt = require('bcrypt');
 const secret = process.env.JWT_SECRET;
 
 
-// function verifyToken(req, res, next) {
-//   console.log("Veryify Token Response");
-//   const token = req.get('Authorization');
-//   try {
-//     jwt.verify(token, secret);
-//     next();
-//   } catch (err){
-//     console.log(err);
-//     res.send("Not Authenticated").status(401);
-//   }
-// }
-
 router.get('/token', (req, res, next) => {
   if (!req.cookies.token){
     res.status(200).json(false);
@@ -71,7 +59,8 @@ router.post('/token', (req, res, next) => {
 });
 
 router.delete('/token', (req, res, next) => {
-
+  res.clearCookie("token");
+  res.json(true).status(200);
 });
 
 module.exports = router;
