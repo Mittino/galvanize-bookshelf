@@ -4,6 +4,8 @@ const express = require('express');
 
 // eslint-disable-next-line new-cap
 const router = express.Router();
+const ev = require('express-validation');
+const validations = require('../validations/books');
 
 var knex = require('../knex');
 const {decamelizeKeys, camelizeKeys} = require('humps');
@@ -33,7 +35,7 @@ router.get('/books/:id', (req, res, next) => {
   });
 });
 
-router.post('/books', (req, res, next) => {
+router.post('/books', ev(validations.post), (req, res, next) => {
   knex('books')
   .insert({
     title: req.body.title,
